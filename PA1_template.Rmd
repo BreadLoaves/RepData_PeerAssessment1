@@ -7,41 +7,41 @@ output:
 
 ## Loading and preprocessing the data
 
-```{r}
+```{r warning = FALSE}
 library(lattice)
 library(knitr)
-library(here)
-here("C:/Users/alexa/PycharmProjects/Rstuff/activity.csv")
-unzip("activity.zip")
 data <- read.csv("activity.csv")
 ```
 
 ## What is mean total number of steps taken per day?
 
 ```{r}
-Stepstaken <- aggregate(steps ~ date, data, sum)
-hist(Stepstaken$steps, xlab = paste("Steps taken per day"), col = 'red', main = "Total steps per day")
-mean <- mean(Stepstaken$steps)
+Steps <- aggregate(steps ~ date, data, sum)
+Daily_interval <- aggregate(steps ~ interval, data, FUN = mean)
+Average <- aggregate(steps ~ interval, data = data, FUN = mean)
+
+hist(Steps$steps, xlab = paste("Steps taken per day"), col = 'red', main = "Total steps per day")
+
+mean <- mean(Steps$steps)
 mean
-median <- median(Stepstaken$steps)
+
+median <- median(Steps$steps)
 median
 ```
 
 ## What is the average daily activity pattern?
 
 ```{r}
-Daily_interval <- aggregate(steps ~ interval, DATA = data, FUN = mean)
-
 plot(Daily_interval$interval, Daily_interval$steps, type = 'l',
      xlab = "Interval", ylab = "Steps", main = "Average daily activity patten")
-Max_interval <- Daily_interval[which.max(Daily_interval),1]
+
+Max_interval <- Daily_interval[which.max(Daily_interval$steps),1]
 Max_interval
 ```
 
 ## Imputing missing values
 
 ```{r}
-Average <- aggregate(steps ~ interval, data = data, FUN = mean)
 fillNA <- numeric()
 
 for(i in 1:nrow(data)) {
@@ -77,6 +77,7 @@ hist(Steps$steps, main = paste("Total Steps Each Day"), col="blue", xlab="Number
 weekdays <- c("Monday", "Tuesday", "Wednesday", "Thursday", "Friday")
 new_activity$dow = as.factor(ifelse(is.element(weekdays(as.Date(new_activity$date)),weekdays), "Weekday", "Weekend"))
 
-StepsTotalUnion <- aggregate(steps ~ interval + dow, new_activity, mean)
+StepsTotalUnion <- aggregate(steps ~ interval + dow, new_activity, sum)
+
 xyplot(StepsTotalUnion$steps ~ StepsTotalUnion$interval|StepsTotalUnion$dow, main="Average Steps per Day by Interval",xlab="Interval", ylab="Steps",layout=c(1,2), type="l", col = 'black')
 ```
